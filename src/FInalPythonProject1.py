@@ -9,7 +9,7 @@ name_motion = ['Walking', 'Jogging', 'Crouch']
 name_grf = ['Walking_FP', 'Jogging_FP', 'Crouch_FP']
 
 # Set the motion index
-index = 0 # Example: index=0 for Walking, index=1 for Jogging, index=2 for Crouch
+index = 1 # Example: index=0 for Walking, index=1 for Jogging, index=2 for Crouch
 
 # Read data
 data_trc = pd.read_csv(f"../Proj1files/{name_motion[index]}.csv")
@@ -162,8 +162,11 @@ cross_product_ankle_R = shank_R[:, 0] * foot_R[:, 1] - shank_R[:, 1] * foot_R[:,
 ankle_angle_R_radians_sign = ankle_angle_R_radians * np.sign(cross_product_ankle_R) + np.radians(10 - 90)
 ankle_angle_R_degrees = np.degrees(ankle_angle_R_radians_sign)
 
-# Function for plotting angles
-def plot_joint_angles(time, left_angle, right_angle, title, ylabel):
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function for plotting angles with manually set y-axis limits
+def plot_joint_angles(time, left_angle, right_angle, title, ylabel, ylim):
     plt.figure()
     plt.plot(time, left_angle, 'r', linewidth=3, label='Left')
     plt.plot(time, right_angle, 'b', linewidth=3, label='Right')
@@ -173,10 +176,11 @@ def plot_joint_angles(time, left_angle, right_angle, title, ylabel):
     plt.title(title)
     plt.legend()
     plt.grid(True)
+    plt.ylim(ylim)  # Set y-axis limits
     plt.savefig("../plots/JointAngles/"+title+".png")
-    # Function for plotting angles
 
-def plot_jog_joint_angles(time,right_angle, title, ylabel):
+# Function for plotting jogging angles with manually set y-axis limits
+def plot_jog_joint_angles(time, right_angle, title, ylabel, ylim):
     plt.figure()
     plt.plot(time, right_angle, 'b', linewidth=3, label='Right')
     plt.xlabel('Time [%]')
@@ -185,26 +189,40 @@ def plot_jog_joint_angles(time,right_angle, title, ylabel):
     plt.title(title)
     plt.legend()
     plt.grid(True)
+    plt.ylim(ylim)  # Set y-axis limits
     plt.savefig("../plots/JoggingJointAngles/"+title+".png")
 
-# Generate normalized time scale for plots
+# Define y-axis limits for each joint
+joint_ylim = {
+    'Walking Trunk Angle': (0, 15),
+    'Walking Pelvis Angle': (0, 25),
+    'Walking Hip Joint Angle': (-20, 40),
+    'Walking Knee Joint Angle': (-10, 80),
+    'Walking Ankle Joint Angle': (-30, 20),
+    'Jogging Trunk Angle': (0, 15),
+    'Jogging Pelvis Angle': (0, 25),
+    'Jogging Hip Joint Angle': (-20, 40),
+    'Jogging Knee Joint Angle': (-10, 80),
+    'Jogging Ankle Joint Angle': (-30, 20)
+}
 
-if (index ==0):
+# Generate normalized time scale for plots
+if index == 0:
     # Plot each joint's angles walking
     time = np.linspace(0, 100, len(right_trunk_angle_degrees[44:153]))
-    plot_joint_angles(time, left_trunk_angle_degrees[95:204], right_trunk_angle_degrees[44:153], 'Walking Trunk Angle', 'Tilt [deg]')
-    plot_joint_angles(time, left_pelvis_angle_degrees[95:204], right_pelvis_angle_degrees[44:153], 'Walking Pelvis Angle', 'Tilt [deg]')
-    plot_joint_angles(time, hip_angle_L_degrees[95:204], hip_angle_R_degrees[44:153], 'Walking Hip Joint Angle', '(-)Extension / (+)Flexion [deg]')
-    plot_joint_angles(time, knee_angle_L_degrees[95:204], knee_angle_R_degrees[44:153], 'Walking Knee Joint Angle', '(-)Extension / (+)Flexion [deg]')
-    plot_joint_angles(time, ankle_angle_L_degrees[95:204], ankle_angle_R_degrees[44:153], 'Walking Ankle Joint Angle', '(-)Plantar / (+)Dorsiflexion [deg]')
+    plot_joint_angles(time, left_trunk_angle_degrees[95:204], right_trunk_angle_degrees[44:153], 'Walking Trunk Angle', 'Tilt [deg]', joint_ylim['Walking Trunk Angle'])
+    plot_joint_angles(time, left_pelvis_angle_degrees[95:204], right_pelvis_angle_degrees[44:153], 'Walking Pelvis Angle', 'Tilt [deg]', joint_ylim['Walking Pelvis Angle'])
+    plot_joint_angles(time, hip_angle_L_degrees[95:204], hip_angle_R_degrees[44:153], 'Walking Hip Joint Angle', '(-)Extension / (+)Flexion [deg]', joint_ylim['Walking Hip Joint Angle'])
+    plot_joint_angles(time, knee_angle_L_degrees[95:204], knee_angle_R_degrees[44:153], 'Walking Knee Joint Angle', '(-)Extension / (+)Flexion [deg]', joint_ylim['Walking Knee Joint Angle'])
+    plot_joint_angles(time, ankle_angle_L_degrees[95:204], ankle_angle_R_degrees[44:153], 'Walking Ankle Joint Angle', '(-)Plantar / (+)Dorsiflexion [deg]', joint_ylim['Walking Ankle Joint Angle'])
 else:
     # Plot each joint's angles jogging
     time = np.linspace(0, 100, len(right_trunk_angle_degrees[39:125]))
-    plot_jog_joint_angles(time, right_trunk_angle_degrees[39:125], 'Jogging Trunk Angle', 'Tilt [deg]')
-    plot_jog_joint_angles(time, right_pelvis_angle_degrees[39:125], 'Jogging Pelvis Angle', 'Tilt [deg]')
-    plot_jog_joint_angles(time, hip_angle_R_degrees[39:125], 'Jogging Hip Joint Angle', '(-)Extension / (+)Flexion [deg]')
-    plot_jog_joint_angles(time,  knee_angle_R_degrees[39:125], 'Jogging Knee Joint Angle', '(-)Extension / (+)Flexion [deg]')
-    plot_jog_joint_angles(time, ankle_angle_R_degrees[39:125], 'Jogging Ankle Joint Angle', '(-)Plantar / (+)Dorsiflexion [deg]')
+    plot_jog_joint_angles(time, right_trunk_angle_degrees[39:125], 'Jogging Trunk Angle', 'Tilt [deg]', joint_ylim['Jogging Trunk Angle'])
+    plot_jog_joint_angles(time, right_pelvis_angle_degrees[39:125], 'Jogging Pelvis Angle', 'Tilt [deg]', joint_ylim['Jogging Pelvis Angle'])
+    plot_jog_joint_angles(time, hip_angle_R_degrees[39:125], 'Jogging Hip Joint Angle', '(-)Extension / (+)Flexion [deg]', joint_ylim['Jogging Hip Joint Angle'])
+    plot_jog_joint_angles(time, knee_angle_R_degrees[39:125], 'Jogging Knee Joint Angle', '(-)Extension / (+)Flexion [deg]', joint_ylim['Jogging Knee Joint Angle'])
+    plot_jog_joint_angles(time, ankle_angle_R_degrees[39:125], 'Jogging Ankle Joint Angle', '(-)Plantar / (+)Dorsiflexion [deg]', joint_ylim['Jogging Ankle Joint Angle'])
 
 # Constants
 body_weight = 72.8
@@ -426,7 +444,8 @@ for i in range(numFramesR):
     
     Result_R[:, i] = np.linalg.solve(M_current_R, coef_current_R)
 
-def plot_joint_moments_and_powers(normalized_time, dataL,dataR, ylabel, title):
+# Function for plotting joint moments and powers with manually set y-axis limits
+def plot_joint_moments(normalized_time, dataL, dataR, ylabel, title, ylim):
     plt.figure()
     plt.plot(normalized_time, dataL, 'r', linewidth=3, label='Left')
     plt.plot(normalized_time, dataR, 'b', linewidth=3, label='Right')
@@ -436,9 +455,26 @@ def plot_joint_moments_and_powers(normalized_time, dataL,dataR, ylabel, title):
     plt.title(title)
     plt.legend()
     plt.grid(True)
-    plt.savefig("../plots/MomentsAndPowers/"+title+".png")
+    plt.ylim(ylim)  # Set y-axis limits
+    plt.savefig("../plots/Moments/"+title+".png")
+    # Function for plotting joint moments and powers with manually set y-axis limits
 
-def plot_jog_joint_moments_and_powers(normalized_time,dataR, ylabel, title):
+def plot_joint_powers(normalized_time, dataL, dataR, ylabel, title, ylim):
+    plt.figure()
+    plt.plot(normalized_time, dataL, 'r', linewidth=3, label='Left')
+    plt.plot(normalized_time, dataR, 'b', linewidth=3, label='Right')
+    plt.xlabel('Time [%]')
+    plt.ylabel(ylabel)
+    plt.axhline(0, linestyle='--', color='k', linewidth=1.5)
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+    plt.ylim(ylim)  # Set y-axis limits
+    plt.savefig("../plots/Powers/"+title+".png")
+
+
+# Function for plotting jogging joint moments and powers with manually set y-axis limits
+def plot_jog_joint_moments(normalized_time, dataR, ylabel, title, ylim):
     plt.figure()
     plt.plot(normalized_time, dataR, 'b', linewidth=3, label='Right')
     plt.xlabel('Time [%]')
@@ -447,7 +483,33 @@ def plot_jog_joint_moments_and_powers(normalized_time,dataR, ylabel, title):
     plt.title(title)
     plt.legend()
     plt.grid(True)
-    plt.savefig("../plots/JogMomentsAndPowers/"+title+".png")
+    plt.ylim(ylim)  # Set y-axis limits
+    plt.savefig("../plots/JogMoments/"+title+".png")
+
+
+# Function for plotting jogging joint moments and powers with manually set y-axis limits
+def plot_jog_joint_powers(normalized_time, dataR, ylabel, title, ylim):
+    plt.figure()
+    plt.plot(normalized_time, dataR, 'b', linewidth=3, label='Right')
+    plt.xlabel('Time [%]')
+    plt.ylabel(ylabel)
+    plt.axhline(0, linestyle='--', color='k', linewidth=1.5)
+    plt.title(title)
+    plt.legend()
+    plt.grid(True)
+    plt.ylim(ylim)  # Set y-axis limits
+    plt.savefig("../plots/JogPowers/"+title+".png")
+
+
+# Define y-axis limits for each joint moment and power
+joint_moment_power_ylim = {
+    'Walking Hip Joint Moment': (-1.5, 1.5),
+    'Walking Knee Joint Moment': (-1.5, 1.5),
+    'Walking Ankle Joint Moment': (-1, 4),
+    'Walking Hip Joint Power': (-5, 5),
+    'Walking Knee Joint Power': (-5, 5),
+    'Walking Ankle Joint Power': (-10, 15)
+}
 
 if (index == 0):
     # Normal walking
@@ -476,20 +538,18 @@ if (index == 0):
     total_ankle_power_L = -(M3_L * ang_vel3_L[95:204]) 
     total_ankle_power_R = -(M3_R * ang_vel3_R[44:153]) 
 
-    # Creating grouped subplots
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
     # Plot Joint Moments
-    plot_joint_moments_and_powers(normalized_time_L, M1_L, M1_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Walking Hip Joint Moment')
-    plot_joint_moments_and_powers(normalized_time_L, M2_L, M2_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Walking Knee Joint Moment')
-    plot_joint_moments_and_powers( normalized_time_L, M3_L, M3_R, '(-)Dorsi / (+)Plantarflexion [Nm/kg]', 'Walking Ankle Joint Moment')
+    plot_joint_moments(normalized_time_L, M1_L, M1_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Walking Hip Joint Moment', joint_moment_power_ylim['Walking Hip Joint Moment'])
+    plot_joint_moments(normalized_time_L, M2_L, M2_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Walking Knee Joint Moment', joint_moment_power_ylim['Walking Knee Joint Moment'])
+    plot_joint_moments(normalized_time_L, M3_L, M3_R, '(-)Dorsi / (+)Plantarflexion [Nm/kg]', 'Walking Ankle Joint Moment', joint_moment_power_ylim['Walking Ankle Joint Moment'])
 
     # Plot Joint Powers
-    plot_joint_moments_and_powers(normalized_time_L, total_hip_power_L, total_hip_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Hip Joint Power')
-    plot_joint_moments_and_powers(normalized_time_L, total_knee_power_L, total_knee_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Knee Joint Power')
-    plot_joint_moments_and_powers(normalized_time_L, total_ankle_power_L,  total_ankle_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Ankle Joint Power')
+    plot_joint_powers(normalized_time_L, total_hip_power_L, total_hip_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Hip Joint Power', joint_moment_power_ylim['Walking Hip Joint Power'])
+    plot_joint_powers(normalized_time_L, total_knee_power_L, total_knee_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Knee Joint Power', joint_moment_power_ylim['Walking Knee Joint Power'])
+    plot_joint_powers(normalized_time_L, total_ankle_power_L, total_ankle_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Walking Ankle Joint Power', joint_moment_power_ylim['Walking Ankle Joint Power'])
 
-    
+        
 else:
     #Jogging
  # Normal walking
@@ -510,11 +570,11 @@ else:
     fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
     # Plot Joint Moments
-    plot_jog_joint_moments_and_powers(normalized_time_R,  M1_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Jogging Hip Joint Moment')
-    plot_jog_joint_moments_and_powers(normalized_time_R,M2_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Jogging Knee Joint Moment')
-    plot_jog_joint_moments_and_powers( normalized_time_R, M3_R, '(-)Dorsi / (+)Plantarflexion [Nm/kg]', 'Jogging Ankle Joint Moment')
+    plot_jog_joint_moments(normalized_time_R,  M1_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Jogging Hip Joint Moment',joint_moment_power_ylim['Walking Hip Joint Moment'])
+    plot_jog_joint_moments(normalized_time_R, M2_R, '(-)Flexion / (+)Extension [Nm/kg]', 'Jogging Knee Joint Moment',joint_moment_power_ylim['Walking Knee Joint Moment'])
+    plot_jog_joint_moments( normalized_time_R, M3_R, '(-)Dorsi / (+)Plantarflexion [Nm/kg]', 'Jogging Ankle Joint Moment',joint_moment_power_ylim['Walking Ankle Joint Moment'])
 
     # Plot Joint Powers
-    plot_jog_joint_moments_and_powers(normalized_time_R, total_hip_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Hip Joint Power')
-    plot_jog_joint_moments_and_powers(normalized_time_R, total_knee_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Knee Joint Power')
-    plot_jog_joint_moments_and_powers(normalized_time_R, total_ankle_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Ankle Joint Power')
+    plot_jog_joint_powers(normalized_time_R, total_hip_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Hip Joint Power',joint_moment_power_ylim['Walking Hip Joint Power'])
+    plot_jog_joint_powers(normalized_time_R, total_knee_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Knee Joint Power',joint_moment_power_ylim['Walking Knee Joint Power'])
+    plot_jog_joint_powers(normalized_time_R, total_ankle_power_R, '(-)Absorption / (+)Generation [W/kg]', 'Jogging Ankle Joint Power',joint_moment_power_ylim['Walking Ankle Joint Power'])
